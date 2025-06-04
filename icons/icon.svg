@@ -1,0 +1,51 @@
+<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background Circle -->
+  <circle cx="64" cy="64" r="60" fill="url(#gradient)" opacity="0.1"/>
+  
+  <!-- Gear Icon -->
+  <g transform="translate(64,64)">
+    <!-- Outer gear teeth -->
+    <g fill="url(#gradient)">
+      <!-- Top -->
+      <rect x="-4" y="-32" width="8" height="12" rx="2"/>
+      <!-- Top Right -->
+      <rect x="18" y="-26" width="12" height="8" rx="2" transform="rotate(45)"/>
+      <!-- Right -->
+      <rect x="24" y="-4" width="12" height="8" rx="2"/>
+      <!-- Bottom Right -->
+      <rect x="18" y="18" width="12" height="8" rx="2" transform="rotate(135)"/>
+      <!-- Bottom -->
+      <rect x="-4" y="24" width="8" height="12" rx="2"/>
+      <!-- Bottom Left -->
+      <rect x="-26" y="18" width="12" height="8" rx="2" transform="rotate(225)"/>
+      <!-- Left -->
+      <rect x="-36" y="-4" width="12" height="8" rx="2"/>
+      <!-- Top Left -->
+      <rect x="-26" y="-26" width="12" height="8" rx="2" transform="rotate(315)"/>
+    </g>
+    
+    <!-- Main gear body -->
+    <circle cx="0" cy="0" r="20" fill="url(#gradient)"/>
+    
+    <!-- Inner circle (hole) -->
+    <circle cx="0" cy="0" r="8" fill="white"/>
+    
+    <!-- Center dot -->
+    <circle cx="0" cy="0" r="3" fill="url(#gradient)"/>
+  </g>
+  
+  <!-- Document/Config symbol in corner -->
+  <g transform="translate(85,85)">
+    <rect x="0" y="0" width="16" height="20" rx="2" fill="white" stroke="url(#gradient)" stroke-width="2"/>
+    <line x1="3" y1="5" x2="13" y2="5" stroke="url(#gradient)" stroke-width="1.5"/>
+    <line x1="3" y1="9" x2="13" y2="9" stroke="url(#gradient)" stroke-width="1.5"/>
+    <line x1="3" y1="13" x2="10" y2="13" stroke="url(#gradient)" stroke-width="1.5"/>
+  </g>
+</svg> 
