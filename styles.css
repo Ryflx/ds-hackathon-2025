@@ -404,4 +404,176 @@ header {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+/* Enhanced Custom Flow Builder Styles */
+.custom-flow-option {
+    border-color: var(--ds-poppy) !important;
+}
+
+.custom-flow-builder {
+    margin-top: 12px;
+    padding: 16px;
+    background: var(--ds-ecru);
+    border-radius: 8px;
+    border: 1px solid var(--ds-mist);
+}
+
+.custom-flow-name {
+    margin-bottom: 16px;
+}
+
+.custom-flow-name label {
+    display: block;
+    font-weight: 600;
+    color: var(--ds-inkwell);
+    margin-bottom: 6px;
+    font-size: 14px;
+}
+
+.custom-steps-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.custom-steps-header label {
+    font-weight: 600;
+    color: var(--ds-inkwell);
+    font-size: 14px;
+    margin: 0;
+}
+
+.add-step-btn {
+    background: var(--ds-cobalt);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.add-step-btn:hover {
+    background: var(--ds-deep-violet);
+    transform: translateY(-1px);
+}
+
+.custom-steps-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.custom-step-pair {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.step-input-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.step-name-input {
+    flex: 1;
+}
+
+.step-name-input label {
+    display: block;
+    font-weight: 600;
+    color: var(--ds-inkwell);
+    margin-bottom: 4px;
+    font-size: 13px;
+}
+
+.custom-step-name {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--ds-mist);
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 14px;
+    background: white;
+    color: var(--ds-inkwell);
+}
+
+.custom-step-name:focus {
+    outline: none;
+    border-color: var(--ds-cobalt);
+    box-shadow: 0 0 0 2px rgba(76, 0, 255, 0.1);
+}
+
+.remove-step-btn {
+    background: var(--ds-poppy);
+    color: white;
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.remove-step-btn:hover {
+    background: #E53E3E;
+    transform: scale(1.1);
+}
+
+.value-input-row label {
+    display: block;
+    font-weight: 600;
+    color: var(--ds-inkwell);
+    margin-bottom: 6px;
+    font-size: 13px;
+}
+
+.custom-step-value {
+    width: 100%;
+    min-height: 60px;
+    padding: 8px 12px;
+    border: 1px solid var(--ds-mist);
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 13px;
+    resize: vertical;
+    background: white;
+    color: var(--ds-inkwell);
+    line-height: 1.4;
+}
+
+.custom-step-value:focus {
+    outline: none;
+    border-color: var(--ds-cobalt);
+    box-shadow: 0 0 0 2px rgba(76, 0, 255, 0.1);
+}
+
+#customFlowName {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--ds-mist);
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 14px;
+    background: white;
+    color: var(--ds-inkwell);
+}
+
+#customFlowName:focus {
+    outline: none;
+    border-color: var(--ds-cobalt);
+    box-shadow: 0 0 0 2px rgba(76, 0, 255, 0.1);
 } 

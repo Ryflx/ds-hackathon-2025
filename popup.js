@@ -14,25 +14,36 @@ document.addEventListener('DOMContentLoaded', function() {
     const flowOptions = {
         IAM: {
             'flow1': {
-                title: 'Flow 1: Full IAM Demo',
+                title: 'Flow 1: Full IAM',
                 description: 'Complete IAM workflow with all key components',
-                components: ['Web Form', 'Maestro', 'IDV Verification', 'Navigator'],
+                components: ['Web Form', 'Document Generation', 'ID Verification', 'Navigator', 'Maestro'],
                 steps: [
                     'Start with Web Form configuration',
-                    'Set up Maestro automation',
-                    'Configure IDV Verification process',
-                    'Navigate through agreement workflow'
-                ]
+                    'Generate documents automatically', 
+                    'Verify identity through IDV process',
+                    'Navigate through agreement workflow',
+                    'Automate with Maestro capabilities'
+                ],
+                valueStatements: {
+                    'Web Form': 'Streamline data collection with intelligent forms that reduce errors by 85% and speed up document creation',
+                    'Document Generation': 'Auto-generate accurate documents in seconds, eliminating manual drafting and reducing turnaround time by 70%',
+                    'ID Verification': 'Ensure signer authenticity with bank-grade identity verification, reducing fraud risk by 99%',
+                    'Navigator': 'Guide signers through complex agreements with smart navigation, improving completion rates by 40%',
+                    'Maestro': 'Orchestrate entire workflows automatically, reducing manual coordination effort by 90%'
+                }
             },
             'flow2': {
-                title: 'Flow 2: Navigator + Obligations',
+                title: 'Flow 2: Agreement Repository',
                 description: 'Focused demo on Navigator and obligation management',
-                components: ['Navigator', 'Obligation Management'],
+                components: ['Navigator', 'Obligations'],
                 steps: [
                     'Access Navigator interface',
-                    'Set up obligation tracking',
-                    'Manage compliance requirements'
-                ]
+                    'Manage ongoing obligations and deadlines'
+                ],
+                valueStatements: {
+                    'Navigator': 'Centralized hub for all agreement activities, providing 360° visibility and reducing search time by 80%',
+                    'Obligations': 'Never miss critical deadlines with automated obligation tracking, reducing compliance risk by 95%'
+                }
             }
         },
         CLM: {
@@ -46,7 +57,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     'Legal team review process',
                     'Approval workflow',
                     'Electronic signature completion'
-                ]
+                ],
+                valueStatements: {
+                    'Doc Gen': 'Generate contracts 10x faster with intelligent templates and clause libraries',
+                    'External Review': 'Streamline external stakeholder reviews with real-time collaboration tools',
+                    'Legal Review': 'Accelerate legal reviews with AI-powered risk assessment and clause analysis',
+                    'Approval': 'Automate approval workflows based on contract value and risk levels',
+                    'Signature': 'Close deals faster with legally binding electronic signatures'
+                }
             }
         }
     };
@@ -120,6 +138,51 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Function to add a custom step/value pair
+    function addCustomStep() {
+        const stepsList = document.getElementById('customStepsList');
+        const stepNumber = stepsList.children.length + 1;
+        
+        const stepPairDiv = document.createElement('div');
+        stepPairDiv.className = 'custom-step-pair';
+        stepPairDiv.innerHTML = `
+            <div class="step-input-row">
+                <div class="step-name-input">
+                    <label>Step ${stepNumber}:</label>
+                    <input type="text" class="custom-step-name" placeholder="e.g., Web Form" />
+                </div>
+                <button type="button" class="remove-step-btn" title="Remove Step">×</button>
+            </div>
+            <div class="value-input-row">
+                <label>Value Statement:</label>
+                <textarea class="custom-step-value" placeholder="Enter the value proposition for this step..." rows="2"></textarea>
+            </div>
+        `;
+        
+        // Add remove functionality
+        const removeBtn = stepPairDiv.querySelector('.remove-step-btn');
+        removeBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            stepPairDiv.remove();
+            // Renumber remaining steps
+            renumberCustomSteps();
+        });
+        
+        stepsList.appendChild(stepPairDiv);
+        
+        // Focus on the new step name input
+        stepPairDiv.querySelector('.custom-step-name').focus();
+    }
+    
+    // Function to renumber steps after removal
+    function renumberCustomSteps() {
+        const stepPairs = document.querySelectorAll('.custom-step-pair');
+        stepPairs.forEach((pair, index) => {
+            const label = pair.querySelector('.step-name-input label');
+            label.textContent = `Step ${index + 1}:`;
+        });
+    }
+
     // Event listener for demo type selection
     demoTypeSelect.addEventListener('change', function() {
         const selectedType = this.value;
@@ -136,10 +199,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const flows = flowOptions[demoType];
         if (!flows) return;
 
-        // Create flow options
+        // Create flow options container
         const flowOptionsContainer = document.createElement('div');
         flowOptionsContainer.className = 'flow-options';
 
+        // Add predefined flows
         Object.keys(flows).forEach((flowKey) => {
             const flow = flows[flowKey];
             
@@ -192,6 +256,66 @@ document.addEventListener('DOMContentLoaded', function() {
             flowOptionsContainer.appendChild(flowOption);
         });
 
+        // Add custom flow option
+        const customFlowOption = document.createElement('div');
+        customFlowOption.className = 'flow-option custom-flow-option';
+        customFlowOption.innerHTML = `
+            <div class="flow-header">
+                <input type="radio" id="flow-custom" name="selectedFlow" value="custom">
+                <label for="flow-custom" class="flow-title">Custom Flow</label>
+            </div>
+            <div class="flow-description">Create your own demo flow with custom steps and value statements</div>
+            <div class="custom-flow-builder" style="display: none;">
+                <div class="custom-flow-name">
+                    <label for="customFlowName">Flow Name:</label>
+                    <input type="text" id="customFlowName" placeholder="My Custom Flow" />
+                </div>
+                <div class="custom-steps-header">
+                    <label>Demo Steps & Value Statements:</label>
+                    <button type="button" id="addStepBtn" class="add-step-btn">+ Add Step</button>
+                </div>
+                <div class="custom-steps-list" id="customStepsList">
+                    <!-- Dynamic step/value pairs will be added here -->
+                </div>
+            </div>
+        `;
+
+        // Handle custom flow selection
+        const customRadio = customFlowOption.querySelector('#flow-custom');
+        const customBuilder = customFlowOption.querySelector('.custom-flow-builder');
+        
+        customFlowOption.addEventListener('click', function(e) {
+            if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA' && e.target.tagName !== 'BUTTON') {
+                customRadio.checked = true;
+                updateSelectedFlow();
+                customBuilder.style.display = 'block';
+                // Add initial step if none exist
+                if (customBuilder.querySelectorAll('.custom-step-pair').length === 0) {
+                    addCustomStep();
+                }
+            }
+        });
+
+        customRadio.addEventListener('change', function() {
+            if (this.checked) {
+                customBuilder.style.display = 'block';
+                updateSelectedFlow();
+                // Add initial step if none exist
+                if (customBuilder.querySelectorAll('.custom-step-pair').length === 0) {
+                    addCustomStep();
+                }
+            }
+        });
+
+        // Add step button functionality
+        const addStepBtn = customFlowOption.querySelector('#addStepBtn');
+        addStepBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            addCustomStep();
+        });
+
+        flowOptionsContainer.appendChild(customFlowOption);
+
         flowSection.innerHTML = '';
         flowSection.appendChild(flowOptionsContainer);
     }
@@ -217,12 +341,66 @@ document.addEventListener('DOMContentLoaded', function() {
         const selectedFlow = document.querySelector('input[name="selectedFlow"]:checked');
         const demoType = demoTypeSelect.value;
         
-        const formData = {
-            demoType: demoType,
-            personaName: personaNameInput.value,
-            selectedFlow: selectedFlow ? selectedFlow.value : null,
-            flowDetails: selectedFlow ? flowOptions[demoType][selectedFlow.value] : null
-        };
+        let formData;
+        
+        if (selectedFlow && selectedFlow.value === 'custom') {
+            // Handle custom flow
+            const customFlowName = document.getElementById('customFlowName').value;
+            const stepPairs = document.querySelectorAll('.custom-step-pair');
+            
+            if (stepPairs.length === 0) {
+                alert('Please add at least one demo step for your custom flow.');
+                return;
+            }
+            
+            const stepsArray = [];
+            const customValueStatements = {};
+            let hasEmptyFields = false;
+            
+            stepPairs.forEach((pair, index) => {
+                const stepName = pair.querySelector('.custom-step-name').value.trim();
+                const stepValue = pair.querySelector('.custom-step-value').value.trim();
+                
+                if (!stepName) {
+                    alert(`Please enter a name for Step ${index + 1}.`);
+                    hasEmptyFields = true;
+                    return;
+                }
+                
+                if (!stepValue) {
+                    alert(`Please enter a value statement for Step ${index + 1}: ${stepName}.`);
+                    hasEmptyFields = true;
+                    return;
+                }
+                
+                stepsArray.push(stepName);
+                customValueStatements[stepName] = stepValue;
+            });
+            
+            if (hasEmptyFields) return;
+            
+            const flowName = customFlowName.trim() || 'Custom Flow';
+            
+            formData = {
+                demoType: demoType,
+                personaName: personaNameInput.value,
+                selectedFlow: 'custom',
+                flowDetails: {
+                    title: flowName,
+                    components: stepsArray,
+                    steps: stepsArray.map(step => `Execute ${step}`),
+                    valueStatements: customValueStatements
+                }
+            };
+        } else {
+            // Handle predefined flows
+            formData = {
+                demoType: demoType,
+                personaName: personaNameInput.value,
+                selectedFlow: selectedFlow ? selectedFlow.value : null,
+                flowDetails: selectedFlow ? flowOptions[demoType][selectedFlow.value] : null
+            };
+        }
 
         displayResults(formData);
         

@@ -131,11 +131,7 @@
         const personaKey = getPersonaKey(config.personaName);
         const persona = personaData[personaKey] || personaData[1];
         
-        // Generate tagline
-        const flowKey = `${config.demoType}-${config.selectedFlow}`;
-        const tagline = demoTaglines[flowKey] || `Demonstrating ${config.demoType} capabilities with ${config.personaName}`;
-        
-        // Build banner HTML
+        // Build banner HTML with flippable content
         banner.innerHTML = `
             <div class="demo-banner-minimize-tab">
                 <span class="demo-banner-minimize-icon">▼</span>
@@ -152,13 +148,28 @@
                 </div>
                 
                 <div class="demo-banner-center">
-                    <div class="demo-banner-tagline">${tagline}</div>
+                    <div class="demo-banner-flip-container">
+                        <div class="demo-banner-flip-inner">
+                            <div class="demo-banner-front">
+                                <div class="demo-banner-steps-title">Demo Steps:</div>
+                                <div class="demo-banner-steps">
+                                    ${createStepsHTML(config.flowDetails)}
+                                </div>
+                            </div>
+                            <div class="demo-banner-back">
+                                <div class="demo-banner-value-title">Value Statement</div>
+                                <div class="demo-banner-value-content">
+                                    <span class="demo-banner-value-text">Click a step to see its value proposition</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="demo-banner-right">
                     <div class="demo-banner-flow-info">
                         <div class="demo-banner-flow-name">${config.flowDetails?.title || 'Demo Flow'}</div>
-                        <div class="demo-banner-flow-type">${config.demoType}</div>
+                        <div class="demo-banner-flow-type">${getFlowTitle(config.flowDetails?.title) || config.demoType}</div>
                     </div>
                 </div>
             </div>
@@ -170,7 +181,62 @@
             toggleBannerCollapse(banner);
         });
         
+        // Add step click handlers
+        addStepClickHandlers(banner, config.flowDetails);
+        
         return banner;
+    }
+    
+    // Create HTML for interactive steps
+    function createStepsHTML(flowDetails) {
+        if (!flowDetails || !flowDetails.components) return '';
+        
+        return flowDetails.components.map(step => 
+            `<span class="demo-step-item" data-step="${step}">${step}</span>`
+        ).join('');
+    }
+    
+    // Add click handlers to steps
+    function addStepClickHandlers(banner, flowDetails) {
+        const stepItems = banner.querySelectorAll('.demo-step-item');
+        
+        stepItems.forEach(stepItem => {
+            stepItem.addEventListener('click', () => {
+                const stepName = stepItem.dataset.step;
+                const valueStatement = flowDetails.valueStatements?.[stepName] || 
+                                     `Demonstrate ${stepName} capabilities and value to your prospects`;
+                
+                showValueStatement(banner, stepName, valueStatement);
+            });
+        });
+    }
+    
+    // Show value statement with flip animation
+    function showValueStatement(banner, stepName, valueStatement) {
+        const valueText = banner.querySelector('.demo-banner-value-text');
+        const flipContainer = banner.querySelector('.demo-banner-flip-inner');
+        
+        valueText.innerHTML = `
+            <div class="value-step-name">${stepName}</div>
+            <div class="value-statement-row">
+                <div class="value-statement">${valueStatement}</div>
+                <button class="demo-banner-back-btn">← Back to Steps</button>
+            </div>
+        `;
+        
+        // Re-attach the back button event listener
+        const newBackBtn = valueText.querySelector('.demo-banner-back-btn');
+        newBackBtn.addEventListener('click', () => {
+            flipToSteps(banner);
+        });
+        
+        flipContainer.classList.add('flipped');
+    }
+    
+    // Flip back to steps view
+    function flipToSteps(banner) {
+        const flipContainer = banner.querySelector('.demo-banner-flip-inner');
+        flipContainer.classList.remove('flipped');
     }
     
     // Toggle banner collapsed state
@@ -186,6 +252,20 @@
             banner.classList.add('collapsed');
             console.log('Demo Sidekick: Banner collapsed');
         }
+    }
+    
+    // Extract flow title from full flow name (e.g., "Full IAM" from "Flow 1: Full IAM")
+    function getFlowTitle(fullTitle) {
+        if (!fullTitle) return null;
+        
+        // Look for pattern "Flow X: Title" and extract the title part
+        const match = fullTitle.match(/^Flow \d+:\s*(.+)$/);
+        if (match) {
+            return match[1];
+        }
+        
+        // If no "Flow X:" pattern, return the full title
+        return fullTitle;
     }
     
     // Map persona name to persona key (simple logic for demo)
