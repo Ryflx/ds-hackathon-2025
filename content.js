@@ -156,6 +156,13 @@
         currentStepIndex = 0;
         currentConfig = null;
         
+        // Remove process flow modal if it exists
+        const modal = document.getElementById('demoFlowModal');
+        if (modal) {
+            modal.remove();
+            document.body.style.overflow = '';
+        }
+        
         // Clear stored config for this specific tab
         const currentTabId = generateTabId();
         const tabConfigKey = `demoConfig_${currentTabId}`;
@@ -170,6 +177,10 @@
         const banner = document.createElement('div');
         banner.className = 'demo-sidekick-banner hidden';
         
+        // Debug: Check if process flow image exists
+        console.log('Demo Sidekick: Creating banner with config:', config);
+        console.log('Demo Sidekick: Process flow image exists:', !!config.processFlowImage);
+        
         // Get persona data (default to persona 1 if not specified)
         const personaKey = getPersonaKey(config.personaName);
         const persona = personaData[personaKey] || personaData[1];
@@ -179,6 +190,11 @@
             <div class="demo-banner-minimize-tab">
                 <span class="demo-banner-minimize-icon">▼</span>
             </div>
+            ${config.processFlowImage ? `
+            <div class="demo-banner-flow-tab">
+                <span class="demo-banner-flow-icon">📋</span>
+            </div>
+            ` : ''}
             <div class="demo-sidekick-banner-content">
                 <div class="demo-banner-left">
                     <img src="${chrome.runtime.getURL(persona.image)}" 
@@ -223,7 +239,15 @@
         minimizeTab.addEventListener('click', () => {
             toggleBannerCollapse(banner);
         });
-        
+
+        // Add process flow tab functionality
+        const flowTab = banner.querySelector('.demo-banner-flow-tab');
+        if (flowTab) {
+            flowTab.addEventListener('click', () => {
+                showProcessFlowModal(config.processFlowImage);
+            });
+        }
+
         // Add step click handlers
         addStepClickHandlers(banner, config.flowDetails);
         
@@ -375,6 +399,70 @@
         
         // Add active class to current step
         stepItems[index].classList.add('active');
+    }
+    
+    // Show process flow modal
+    function showProcessFlowModal(imageData) {
+        // Create modal if it doesn't exist
+        let modal = document.getElementById('demoFlowModal');
+        if (!modal) {
+            modal = createProcessFlowModal();
+            document.body.appendChild(modal);
+        }
+        
+        // Set the image source
+        const modalImage = modal.querySelector('.demo-flow-modal-image');
+        modalImage.src = imageData;
+        
+        // Show modal
+        modal.classList.add('visible');
+        document.body.style.overflow = 'hidden';
+    }
+
+    // Hide process flow modal
+    function hideProcessFlowModal() {
+        const modal = document.getElementById('demoFlowModal');
+        if (modal) {
+            modal.classList.remove('visible');
+            document.body.style.overflow = '';
+        }
+    }
+
+    // Create process flow modal
+    function createProcessFlowModal() {
+        const modal = document.createElement('div');
+        modal.id = 'demoFlowModal';
+        modal.className = 'demo-flow-modal';
+        
+        modal.innerHTML = `
+            <div class="demo-flow-modal-content">
+                <div class="demo-flow-modal-header">
+                    <h3 class="demo-flow-modal-title">Process Flow Diagram</h3>
+                    <button class="demo-flow-modal-close">×</button>
+                </div>
+                <img class="demo-flow-modal-image" src="" alt="Process Flow Diagram">
+            </div>
+        `;
+        
+        // Add event listeners
+        const closeBtn = modal.querySelector('.demo-flow-modal-close');
+        closeBtn.addEventListener('click', hideProcessFlowModal);
+        
+        // Close on outside click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                hideProcessFlowModal();
+            }
+        });
+        
+        // Close on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modal.classList.contains('visible')) {
+                hideProcessFlowModal();
+            }
+        });
+        
+        return modal;
     }
     
     // Auto-hide banner on navigation (optional)

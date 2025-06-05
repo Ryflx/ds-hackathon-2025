@@ -9,8 +9,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const resultsSection = document.getElementById('resultsSection');
     const configSummary = document.getElementById('configSummary');
     
+    // Image upload elements
+    const processFlowImage = document.getElementById('processFlowImage');
+    const uploadArea = document.getElementById('uploadArea');
+    const imagePreview = document.getElementById('imagePreview');
+    const previewImg = document.getElementById('previewImg');
+    const removeImageBtn = document.getElementById('removeImageBtn');
+    
     // Current tab info
     let currentTabId = null;
+    let uploadedImageData = null;
 
     // Function to get current tab's demo configuration
     function getCurrentTabConfig(callback) {
@@ -459,7 +467,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     components: stepsArray,
                     steps: stepsArray.map(step => `Execute ${step}`),
                     valueStatements: customValueStatements
-                }
+                },
+                processFlowImage: uploadedImageData
             };
         } else {
             // Handle predefined flows
@@ -467,13 +476,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 demoType: demoType,
                 personaName: personaNameInput.value,
                 selectedFlow: selectedFlow ? selectedFlow.value : null,
-                flowDetails: selectedFlow ? flowOptions[demoType][selectedFlow.value] : null
+                flowDetails: selectedFlow ? flowOptions[demoType][selectedFlow.value] : null,
+                processFlowImage: uploadedImageData
             };
         }
 
         displayResults(formData);
         
         console.log('Demo Sidekick: Form submitted with data:', formData);
+        console.log('Demo Sidekick: Process flow image in config:', !!formData.processFlowImage);
+        console.log('Demo Sidekick: Image data length:', formData.processFlowImage ? formData.processFlowImage.length : 0);
         
         // Send message to content script to show banner
         chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
@@ -602,6 +614,9 @@ document.addEventListener('DOMContentLoaded', function() {
             endDemoBtn.remove();
         }
         
+        // Clear uploaded image
+        removeImage();
+        
         // Clear stored configuration (this is now handled by hideDemoBanner in content script)
     });
 
@@ -634,16 +649,176 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Add some interactive feedback
-    const inputs = document.querySelectorAll('input, select');
-    inputs.forEach(input => {
-        input.addEventListener('focus', function() {
-            this.parentElement.style.transform = 'scale(1.02)';
-            this.parentElement.style.transition = 'transform 0.2s ease';
-        });
-        
-        input.addEventListener('blur', function() {
-            this.parentElement.style.transform = 'scale(1)';
-        });
-    });
+    // Image upload functionality
+    function initializeImageUpload() {
+        try {
+            // Prevent popup from closing - use mousedown instead of click
+            uploadArea.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+            });
+            
+            uploadArea.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Keep popup alive by focusing back to it
+                window.focus();
+                
+                // Use a timeout to delay the file input click
+                setTimeout(() => {
+                    processFlowImage.click();
+                }, 50);
+            });
+
+            // Keep popup alive when file input gets focus
+            processFlowImage.addEventListener('focus', () => {
+                window.focus();
+            });
+
+            // File input change
+            processFlowImage.addEventListener('change', handleFileSelect);
+
+            // Drag and drop (preferred method)
+            uploadArea.addEventListener('dragover', handleDragOver);
+            uploadArea.addEventListener('dragleave', handleDragLeave);
+            uploadArea.addEventListener('drop', handleDrop);
+
+            // Remove image
+            removeImageBtn.addEventListener('click', removeImage);
+
+            // Load existing image from sessionStorage
+            loadExistingImage();
+            
+            console.log('Demo Sidekick: Image upload initialized successfully');
+        } catch (error) {
+            console.error('Demo Sidekick: Error initializing image upload:', error);
+        }
+    }
+
+    function handleFileSelect(event) {
+        try {
+            const file = event.target.files[0];
+            if (file) {
+                processFile(file);
+            }
+        } catch (error) {
+            console.error('Demo Sidekick: Error in handleFileSelect:', error);
+        }
+    }
+
+    function handleDragOver(event) {
+        try {
+            event.preventDefault();
+            uploadArea.classList.add('dragover');
+        } catch (error) {
+            console.error('Demo Sidekick: Error in handleDragOver:', error);
+        }
+    }
+
+    function handleDragLeave(event) {
+        try {
+            event.preventDefault();
+            uploadArea.classList.remove('dragover');
+        } catch (error) {
+            console.error('Demo Sidekick: Error in handleDragLeave:', error);
+        }
+    }
+
+    function handleDrop(event) {
+        try {
+            event.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const files = event.dataTransfer.files;
+            if (files.length > 0) {
+                processFile(files[0]);
+            }
+        } catch (error) {
+            console.error('Demo Sidekick: Error in handleDrop:', error);
+        }
+    }
+
+    function processFile(file) {
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            alert('Please select an image file (PNG, JPG, or GIF).');
+            return;
+        }
+
+        // Validate file size (5MB max)
+        if (file.size > 5 * 1024 * 1024) {
+            alert('Image size must be less than 5MB.');
+            return;
+        }
+
+        try {
+            // Convert to base64 and display
+            const reader = new FileReader();
+            
+            reader.onerror = function(error) {
+                console.error('Demo Sidekick: Error reading file:', error);
+                alert('Error reading file. Please try again.');
+            };
+            
+            reader.onload = function(e) {
+                try {
+                    const imageData = e.target.result;
+                    displayImagePreview(imageData);
+                    uploadedImageData = imageData;
+                    
+                    // Store in sessionStorage
+                    sessionStorage.setItem('processFlowImage', imageData);
+                    console.log('Demo Sidekick: Image processed successfully, size:', imageData.length);
+                } catch (error) {
+                    console.error('Demo Sidekick: Error processing image:', error);
+                    alert('Error processing image. Please try again.');
+                }
+            };
+            
+            reader.readAsDataURL(file);
+        } catch (error) {
+            console.error('Demo Sidekick: Error in processFile:', error);
+            alert('Error processing file. Please try again.');
+        }
+    }
+
+    function displayImagePreview(imageData) {
+        try {
+            previewImg.src = imageData;
+            imagePreview.style.display = 'block';
+            uploadArea.style.display = 'none';
+        } catch (error) {
+            console.error('Demo Sidekick: Error in displayImagePreview:', error);
+        }
+    }
+
+    function removeImage() {
+        try {
+            uploadedImageData = null;
+            imagePreview.style.display = 'none';
+            uploadArea.style.display = 'block';
+            processFlowImage.value = '';
+            
+            // Remove from sessionStorage
+            sessionStorage.removeItem('processFlowImage');
+        } catch (error) {
+            console.error('Demo Sidekick: Error in removeImage:', error);
+        }
+    }
+
+    function loadExistingImage() {
+        try {
+            const existingImage = sessionStorage.getItem('processFlowImage');
+            if (existingImage) {
+                displayImagePreview(existingImage);
+                uploadedImageData = existingImage;
+            }
+        } catch (error) {
+            console.error('Demo Sidekick: Error in loadExistingImage:', error);
+        }
+    }
+
+    // Initialize image upload functionality
+    initializeImageUpload();
 }); 

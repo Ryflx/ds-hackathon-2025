@@ -43,6 +43,27 @@
                 </div>
             </div>
 
+            <!-- Process Flow Image Upload -->
+            <div class="form-group">
+                <label for="processFlowImage">4. Upload Process Flow Image (Optional):</label>
+                <div class="image-upload-section">
+                    <input type="file" id="processFlowImage" name="processFlowImage" accept="image/*" style="display: none;">
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-content">
+                            <div class="upload-icon">📄</div>
+                            <div class="upload-text">
+                                <span class="upload-primary">Drag & drop process flow here</span>
+                                <span class="upload-secondary">or click to browse • PNG, JPG, GIF up to 5MB</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="image-preview" id="imagePreview" style="display: none;">
+                        <img id="previewImg" src="" alt="Process Flow Preview">
+                        <button type="button" class="remove-image-btn" id="removeImageBtn">×</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Action Buttons -->
             <div class="form-actions">
                 <button type="button" id="resetBtn" class="btn btn-secondary">Reset</button>
