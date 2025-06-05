@@ -2,101 +2,340 @@ document.addEventListener('DOMContentLoaded', function() {
     // DOM elements
     const demoTypeSelect = document.getElementById('demoType');
     const personaNameInput = document.getElementById('personaName');
-    const componentsSection = document.getElementById('componentsSection');
-    const demoStageSelect = document.getElementById('demoStage');
+    const flowSection = document.getElementById('flowSection');
     const resetBtn = document.getElementById('resetBtn');
     const submitBtn = document.getElementById('submitBtn');
+    const testBtn = document.getElementById('testBtn');
     const demoForm = document.getElementById('demoForm');
     const resultsSection = document.getElementById('resultsSection');
     const configSummary = document.getElementById('configSummary');
 
-    // Component options for different demo types
-    const componentOptions = {
-        IAM: [
-            'Document Intelligence',
-            'Contract Analysis',
-            'Risk Assessment',
-            'Compliance Check',
-            'Automated Review',
-            'Agreement Templates'
-        ],
-        CLM: [
-            'Doc Gen',
-            'External Review',
-            'Legal Review',
-            'Approval',
-            'Signature'
-        ]
+    // Flow definitions for different demo types
+    const flowOptions = {
+        IAM: {
+            'flow1': {
+                title: 'Flow 1: Full IAM Demo',
+                description: 'Complete IAM workflow with all key components',
+                components: ['Web Form', 'Maestro', 'IDV Verification', 'Navigator'],
+                steps: [
+                    'Start with Web Form configuration',
+                    'Set up Maestro automation',
+                    'Configure IDV Verification process',
+                    'Navigate through agreement workflow'
+                ]
+            },
+            'flow2': {
+                title: 'Flow 2: Navigator + Obligations',
+                description: 'Focused demo on Navigator and obligation management',
+                components: ['Navigator', 'Obligation Management'],
+                steps: [
+                    'Access Navigator interface',
+                    'Set up obligation tracking',
+                    'Manage compliance requirements'
+                ]
+            }
+        },
+        CLM: {
+            'flow1': {
+                title: 'CLM Standard Flow',
+                description: 'Complete contract lifecycle management process',
+                components: ['Doc Gen', 'External Review', 'Legal Review', 'Approval', 'Signature'],
+                steps: [
+                    'Generate contract documents',
+                    'Submit for external review',
+                    'Legal team review process',
+                    'Approval workflow',
+                    'Electronic signature completion'
+                ]
+            }
+        }
     };
+
+    // Function to inject content script manually if needed
+    function ensureContentScript(tabId, callback) {
+        // First try to ping the existing content script
+        chrome.tabs.sendMessage(tabId, { action: 'checkBannerStatus' }, function(response) {
+            if (chrome.runtime.lastError) {
+                console.log('Demo Sidekick: Content script not found, injecting manually...');
+                
+                // Inject the content script manually
+                chrome.scripting.executeScript({
+                    target: { tabId: tabId },
+                    files: ['content.js']
+                }, function() {
+                    if (chrome.runtime.lastError) {
+                        console.error('Demo Sidekick: Failed to inject content script:', chrome.runtime.lastError.message);
+                        callback(false);
+                    } else {
+                        console.log('Demo Sidekick: Content script injected successfully');
+                        
+                        // Also inject the CSS
+                        chrome.scripting.insertCSS({
+                            target: { tabId: tabId },
+                            files: ['banner.css']
+                        }, function() {
+                            if (chrome.runtime.lastError) {
+                                console.error('Demo Sidekick: Failed to inject CSS:', chrome.runtime.lastError.message);
+                            } else {
+                                console.log('Demo Sidekick: CSS injected successfully');
+                            }
+                            callback(true);
+                        });
+                    }
+                });
+            } else {
+                console.log('Demo Sidekick: Content script already loaded');
+                callback(true);
+            }
+        });
+    }
+
+    // Function to end the demo
+    function endDemo() {
+        chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+            if (tabs[0]) {
+                chrome.tabs.sendMessage(tabs[0].id, {
+                    action: 'hideDemoBanner'
+                }, function(response) {
+                    if (response && response.success) {
+                        console.log('Demo ended successfully');
+                        
+                        // Reset button state
+                        submitBtn.textContent = 'Configure Demo';
+                        submitBtn.style.background = 'linear-gradient(135deg, var(--ds-cobalt) 0%, var(--ds-deep-violet) 100%)';
+                        
+                        // Remove end demo button
+                        const endDemoBtn = document.getElementById('endDemoBtn');
+                        if (endDemoBtn) {
+                            endDemoBtn.remove();
+                        }
+                        
+                        // Hide results section
+                        resultsSection.style.display = 'none';
+                    } else {
+                        console.error('Demo Sidekick: Failed to end demo properly');
+                    }
+                });
+            }
+        });
+    }
 
     // Event listener for demo type selection
     demoTypeSelect.addEventListener('change', function() {
         const selectedType = this.value;
-        updateComponentsSection(selectedType);
+        updateFlowSection(selectedType);
     });
 
-    // Function to update components section based on demo type
-    function updateComponentsSection(demoType) {
+    // Function to update flow section based on demo type
+    function updateFlowSection(demoType) {
         if (!demoType) {
-            componentsSection.innerHTML = '<p class="placeholder-text">Please select a demo type first</p>';
+            flowSection.innerHTML = '<p class="placeholder-text">Please select a demo type first</p>';
             return;
         }
 
-        const components = componentOptions[demoType];
-        if (!components) return;
+        const flows = flowOptions[demoType];
+        if (!flows) return;
 
-        // Create components grid
-        const componentsGrid = document.createElement('div');
-        componentsGrid.className = 'components-grid';
+        // Create flow options
+        const flowOptionsContainer = document.createElement('div');
+        flowOptionsContainer.className = 'flow-options';
 
-        components.forEach((component, index) => {
-            const componentItem = document.createElement('div');
-            componentItem.className = 'component-item';
+        Object.keys(flows).forEach((flowKey) => {
+            const flow = flows[flowKey];
+            
+            const flowOption = document.createElement('div');
+            flowOption.className = 'flow-option';
 
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.id = `component-${index}`;
-            checkbox.name = 'components';
-            checkbox.value = component;
+            const flowHeader = document.createElement('div');
+            flowHeader.className = 'flow-header';
 
-            const label = document.createElement('label');
-            label.htmlFor = `component-${index}`;
-            label.textContent = component;
+            const radio = document.createElement('input');
+            radio.type = 'radio';
+            radio.id = `flow-${flowKey}`;
+            radio.name = 'selectedFlow';
+            radio.value = flowKey;
 
-            componentItem.appendChild(checkbox);
-            componentItem.appendChild(label);
-            componentsGrid.appendChild(componentItem);
+            const flowTitle = document.createElement('label');
+            flowTitle.htmlFor = `flow-${flowKey}`;
+            flowTitle.className = 'flow-title';
+            flowTitle.textContent = flow.title;
+
+            flowHeader.appendChild(radio);
+            flowHeader.appendChild(flowTitle);
+
+            const flowDescription = document.createElement('div');
+            flowDescription.className = 'flow-description';
+            flowDescription.textContent = flow.description;
+
+            const flowComponents = document.createElement('div');
+            flowComponents.className = 'flow-components';
+
+            flow.components.forEach(component => {
+                const componentTag = document.createElement('span');
+                componentTag.className = 'flow-component';
+                componentTag.textContent = component;
+                flowComponents.appendChild(componentTag);
+            });
+
+            flowOption.appendChild(flowHeader);
+            flowOption.appendChild(flowDescription);
+            flowOption.appendChild(flowComponents);
+
+            // Add click handler for the entire flow option
+            flowOption.addEventListener('click', function() {
+                radio.checked = true;
+                updateSelectedFlow();
+            });
+
+            radio.addEventListener('change', updateSelectedFlow);
+
+            flowOptionsContainer.appendChild(flowOption);
         });
 
-        componentsSection.innerHTML = '';
-        componentsSection.appendChild(componentsGrid);
+        flowSection.innerHTML = '';
+        flowSection.appendChild(flowOptionsContainer);
+    }
+
+    // Function to handle flow selection visual feedback
+    function updateSelectedFlow() {
+        const selectedRadio = document.querySelector('input[name="selectedFlow"]:checked');
+        const allFlowOptions = document.querySelectorAll('.flow-option');
+        
+        allFlowOptions.forEach(option => {
+            option.classList.remove('selected');
+        });
+
+        if (selectedRadio) {
+            selectedRadio.closest('.flow-option').classList.add('selected');
+        }
     }
 
     // Form submission handler
     demoForm.addEventListener('submit', function(e) {
         e.preventDefault();
         
+        const selectedFlow = document.querySelector('input[name="selectedFlow"]:checked');
+        const demoType = demoTypeSelect.value;
+        
         const formData = {
-            demoType: demoTypeSelect.value,
+            demoType: demoType,
             personaName: personaNameInput.value,
-            components: getSelectedComponents(),
-            demoStage: demoStageSelect.value
+            selectedFlow: selectedFlow ? selectedFlow.value : null,
+            flowDetails: selectedFlow ? flowOptions[demoType][selectedFlow.value] : null
         };
 
         displayResults(formData);
+        
+        console.log('Demo Sidekick: Form submitted with data:', formData);
+        
+        // Send message to content script to show banner
+        chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+            console.log('Demo Sidekick: Found active tab:', tabs[0]);
+            
+            if (tabs[0]) {
+                console.log('Demo Sidekick: Sending message to tab:', tabs[0].id);
+                
+                ensureContentScript(tabs[0].id, function(success) {
+                    if (success) {
+                        // Wait a moment for the script to initialize
+                        setTimeout(() => {
+                            chrome.tabs.sendMessage(tabs[0].id, {
+                                action: 'showDemoBanner',
+                                config: formData
+                            }, function(response) {
+                                console.log('Demo Sidekick: Response from content script:', response);
+                                
+                                if (chrome.runtime.lastError) {
+                                    console.error('Demo Sidekick: Error injecting banner:', chrome.runtime.lastError.message);
+                                    console.log('Demo Sidekick: This usually means the content script is not loaded on this page.');
+                                    console.log('Demo Sidekick: Try refreshing the page or check if the extension has proper permissions.');
+                                } else if (response && response.success) {
+                                    console.log('Demo banner activated successfully');
+                                    
+                                    // Update button text to indicate demo is active
+                                    submitBtn.textContent = 'Demo Active';
+                                    submitBtn.style.background = 'linear-gradient(135deg, #FF5252 0%, #D32F2F 100%)';
+                                    
+                                    // Add end demo button
+                                    if (!document.getElementById('endDemoBtn')) {
+                                        const endDemoBtn = document.createElement('button');
+                                        endDemoBtn.type = 'button';
+                                        endDemoBtn.id = 'endDemoBtn';
+                                        endDemoBtn.className = 'btn btn-secondary';
+                                        endDemoBtn.textContent = 'End Demo';
+                                        endDemoBtn.style.background = '#6c757d';
+                                        
+                                        endDemoBtn.addEventListener('click', function() {
+                                            endDemo();
+                                        });
+                                        
+                                        const formActions = document.querySelector('.form-actions');
+                                        formActions.insertBefore(endDemoBtn, submitBtn);
+                                    }
+                                } else {
+                                    console.error('Demo Sidekick: Content script did not respond properly');
+                                }
+                            });
+                        }, 500);
+                    } else {
+                        console.error('Demo Sidekick: Failed to ensure content script is loaded');
+                    }
+                });
+            } else {
+                console.error('Demo Sidekick: No active tab found');
+            }
+        });
     });
 
-    // Function to get selected components
-    function getSelectedComponents() {
-        const checkboxes = document.querySelectorAll('input[name="components"]:checked');
-        return Array.from(checkboxes).map(cb => cb.value);
-    }
+    // Test button for debugging
+    testBtn.addEventListener('click', function() {
+        console.log('Demo Sidekick: Test button clicked');
+        
+        // Get current form values or use defaults
+        const currentPersonaName = personaNameInput.value.trim() || 'Test User';
+        const currentDemoType = demoTypeSelect.value || 'IAM';
+        
+        const testConfig = {
+            demoType: currentDemoType,
+            personaName: currentPersonaName,
+            selectedFlow: 'flow1',
+            flowDetails: { 
+                title: `Test ${currentDemoType} Flow`, 
+                components: currentDemoType === 'IAM' ? ['Web Form', 'Maestro'] : ['Doc Gen', 'Review']
+            }
+        };
+        
+        chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+            if (tabs[0]) {
+                ensureContentScript(tabs[0].id, function(success) {
+                    if (success) {
+                        // Wait a moment for the script to initialize
+                        setTimeout(() => {
+                            chrome.tabs.sendMessage(tabs[0].id, {
+                                action: 'showDemoBanner',
+                                config: testConfig
+                            }, function(response) {
+                                console.log('Demo Sidekick: Test response:', response);
+                                if (chrome.runtime.lastError) {
+                                    console.error('Demo Sidekick: Test error:', chrome.runtime.lastError.message);
+                                } else if (response && response.success) {
+                                    console.log('Demo Sidekick: Test banner shown successfully!');
+                                }
+                            });
+                        }, 500);
+                    } else {
+                        console.error('Demo Sidekick: Failed to inject content script for test');
+                    }
+                });
+            }
+        });
+    });
 
     // Function to display results
     function displayResults(data) {
-        const componentsText = data.components.length > 0 
-            ? data.components.join(', ') 
-            : 'None selected';
+        const flowInfo = data.flowDetails ? 
+            `${data.flowDetails.title} (${data.flowDetails.components.join(', ')})` : 
+            'No flow selected';
 
         configSummary.innerHTML = `
             <div class="config-item">
@@ -108,12 +347,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 <span class="value">${data.personaName}</span>
             </div>
             <div class="config-item">
-                <strong>Selected Components:</strong> 
-                <span class="value">${componentsText}</span>
-            </div>
-            <div class="config-item">
-                <strong>Demo Stage:</strong> 
-                <span class="value">${data.demoStage}</span>
+                <strong>Selected Flow:</strong> 
+                <span class="value">${flowInfo}</span>
             </div>
         `;
 
@@ -131,7 +366,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Reset button handler
     resetBtn.addEventListener('click', function() {
         demoForm.reset();
-        componentsSection.innerHTML = '<p class="placeholder-text">Please select a demo type first</p>';
+        flowSection.innerHTML = '<p class="placeholder-text">Please select a demo type first</p>';
         resultsSection.style.display = 'none';
         
         // Clear stored configuration
@@ -149,17 +384,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Restore form values
                 demoTypeSelect.value = config.demoType;
                 personaNameInput.value = config.personaName;
-                demoStageSelect.value = config.demoStage;
                 
-                // Update components section and restore selections
-                updateComponentsSection(config.demoType);
+                // Update flow section and restore selection
+                updateFlowSection(config.demoType);
                 
-                // Wait a bit for components to render, then restore selections
+                // Wait a bit for flows to render, then restore selection
                 setTimeout(() => {
-                    config.components.forEach(componentValue => {
-                        const checkbox = document.querySelector(`input[value="${componentValue}"]`);
-                        if (checkbox) checkbox.checked = true;
-                    });
+                    if (config.selectedFlow) {
+                        const flowRadio = document.querySelector(`input[value="${config.selectedFlow}"]`);
+                        if (flowRadio) {
+                            flowRadio.checked = true;
+                            updateSelectedFlow();
+                        }
+                    }
                 }, 100);
             }
         });

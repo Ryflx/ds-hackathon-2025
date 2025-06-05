@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Sidekick Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .header {
+            background: linear-gradient(135deg, #4C00FF 0%, #26065D 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .content {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .footer {
+            text-align: center;
+            color: #666;
+            margin-top: 40px;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Demo Sidekick Test Page</h1>
+        <p>Use this page to test the Demo Sidekick Chrome extension banner injection.</p>
+    </div>
+    
+    <div class="content">
+        <h2>Testing Instructions</h2>
+        <ol>
+            <li>Load the Demo Sidekick extension in Chrome</li>
+            <li>Click on the extension icon in the toolbar</li>
+            <li>Configure a demo with:
+                <ul>
+                    <li>Demo Type: IAM or CLM</li>
+                    <li>Persona Name: Any name you like</li>
+                    <li>Demo Flow: Select one of the available flows</li>
+                </ul>
+            </li>
+            <li>Click "Configure Demo" to inject the banner</li>
+            <li>You can also use the "Test Banner" button for quick testing</li>
+        </ol>
+        
+        <h2>Expected Behavior</h2>
+        <p>When the demo is configured, you should see:</p>
+        <ul>
+            <li>A banner appearing at the bottom of this page</li>
+            <li>The banner should show persona information, demo tagline, and flow details</li>
+            <li>A close button (×) to end the demo</li>
+            <li>Console logs showing the injection process</li>
+        </ul>
+        
+        <h2>Debugging</h2>
+        <p>If the banner doesn't appear:</p>
+        <ul>
+            <li>Open Developer Tools (F12)</li>
+            <li>Check the Console tab for "Demo Sidekick" messages</li>
+            <li>Refresh this page and try again</li>
+            <li>Make sure the extension has proper permissions</li>
+        </ul>
+    </div>
+    
+    <div class="content">
+        <h2>Sample Content</h2>
+        <p>This is sample content to demonstrate how the banner will appear at the bottom of the page without overlapping the main content.</p>
+        
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+        
+        <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+    </div>
+    
+    <div class="footer">
+        <p>Demo Sidekick Test Page | DocuSign Solution Consultant Tool</p>
+    </div>
+</body>
+</html> 

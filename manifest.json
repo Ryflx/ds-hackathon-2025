@@ -1,14 +1,39 @@
 {
   "manifest_version": 3,
-  "name": "Demo Configuration Tool",
+  "name": "Demo Sidekick",
   "version": "1.0",
-  "description": "A modern Chrome extension for configuring IAM and CLM demos",
+  "description": "DocuSign demo configuration tool for solution consultants - streamline your IAM and CLM demos",
   "permissions": [
-    "activeTab"
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://*.docusign.com/*",
+    "https://*.docusign.net/*",
+    "*://*/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["banner.css"],
+      "run_at": "document_end"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "docs/images/personas/*.png",
+        "docs/images/DemoSidekick.png",
+        "icons/*.png"
+      ],
+      "matches": ["<all_urls>"]
+    }
   ],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Demo Configuration Tool"
+    "default_title": "Demo Sidekick - Demo Configuration Tool"
   },
   "icons": {
     "16": "icons/icon16.png",

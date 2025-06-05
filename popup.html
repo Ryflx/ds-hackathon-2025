@@ -3,13 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Demo Configuration Tool</title>
+    <title>Demo Sidekick - Demo Configuration Tool</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Demo Configuration Tool</h1>
+            <div class="brand-header">
+                <img src="docs/images/DemoSidekick.png" alt="DemoSidekick Logo" class="logo">
+                <div class="brand-text">
+                    <h1>Demo Sidekick</h1>
+                    <p class="tagline">Demo Configuration Tool</p>
+                </div>
+            </div>
         </header>
         
         <form id="demoForm" class="demo-form">
@@ -29,28 +35,18 @@
                 <input type="text" id="personaName" name="personaName" placeholder="Enter persona name" required>
             </div>
 
-            <!-- Components Section -->
+            <!-- Flow Selection Section -->
             <div class="form-group">
-                <label>3. Select Components:</label>
-                <div id="componentsSection" class="components-section">
+                <label>3. Select Demo Flow:</label>
+                <div id="flowSection" class="flow-section">
                     <p class="placeholder-text">Please select a demo type first</p>
                 </div>
-            </div>
-
-            <!-- Demo Stage -->
-            <div class="form-group">
-                <label for="demoStage">4. Select Demo Stage:</label>
-                <select id="demoStage" name="demoStage" required>
-                    <option value="">--Select Stage--</option>
-                    <option value="Create">Create</option>
-                    <option value="Commit">Commit</option>
-                    <option value="Manage">Manage</option>
-                </select>
             </div>
 
             <!-- Action Buttons -->
             <div class="form-actions">
                 <button type="button" id="resetBtn" class="btn btn-secondary">Reset</button>
+                <button type="button" id="testBtn" class="btn" style="background: #FF5252; color: white;">Test Banner</button>
                 <button type="submit" id="submitBtn" class="btn btn-primary">Configure Demo</button>
             </div>
         </form>

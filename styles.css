@@ -1,3 +1,55 @@
+/* DocuSign DS Indigo Font */
+@font-face {
+    font-family: 'DS Indigo';
+    src: url('fonts/ds-indigo-regular.woff2') format('woff2'),
+         url('fonts/ds-indigo-regular.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'DS Indigo';
+    src: url('fonts/ds-indigo-medium.woff2') format('woff2'),
+         url('fonts/ds-indigo-medium.woff') format('woff');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'DS Indigo';
+    src: url('fonts/ds-indigo-semibold.woff2') format('woff2'),
+         url('fonts/ds-indigo-semibold.woff') format('woff');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'DS Indigo';
+    src: url('fonts/ds-indigo-bold.woff2') format('woff2'),
+         url('fonts/ds-indigo-bold.woff') format('woff');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* DocuSign Brand Colors */
+:root {
+    --ds-ecru: #F8F3F0;
+    --ds-mist: #CBC2FF;
+    --ds-white: #FFFFFF;
+    --ds-poppy: #FF5252;
+    --ds-inkwell: #130032;
+    --ds-cobalt: #4C00FF;
+    --ds-deep-violet: #26065D;
+    
+    /* Font Variables - Using Authentic DS Indigo */
+    --ds-font-primary: 'DS Indigo', 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    --ds-font-brand: 'DS Indigo', 'Inter', 'Segoe UI', sans-serif;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -5,32 +57,61 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    font-family: var(--ds-font-primary);
+    background: linear-gradient(135deg, var(--ds-cobalt) 0%, var(--ds-deep-violet) 100%);
     color: #333;
     min-height: 100vh;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 .container {
     width: 400px;
     min-height: 500px;
-    background: #ffffff;
+    background: var(--ds-white);
     border-radius: 12px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 20px 40px rgba(19, 0, 50, 0.2);
     overflow: hidden;
 }
 
 header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, var(--ds-cobalt) 0%, var(--ds-deep-violet) 100%);
     color: white;
     padding: 20px;
-    text-align: center;
 }
 
-header h1 {
+.brand-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: var(--ds-white);
+    padding: 4px;
+}
+
+.brand-text h1 {
+    font-family: var(--ds-font-brand);
     font-size: 18px;
     font-weight: 600;
     letter-spacing: 0.5px;
+    margin: 0;
+    color: var(--ds-white);
+}
+
+.tagline {
+    font-family: var(--ds-font-primary);
+    font-size: 12px;
+    opacity: 0.9;
+    margin: 2px 0 0 0;
+    color: var(--ds-mist);
+    font-weight: 400;
+    letter-spacing: 0.2px;
 }
 
 .demo-form {
@@ -43,36 +124,48 @@ header h1 {
 
 .form-group label {
     display: block;
+    font-family: var(--ds-font-primary);
     font-weight: 600;
-    color: #2c3e50;
+    color: var(--ds-inkwell);
     margin-bottom: 8px;
     font-size: 14px;
+    letter-spacing: 0.1px;
 }
 
 .form-group select,
 .form-group input[type="text"] {
     width: 100%;
     padding: 12px 16px;
-    border: 2px solid #e1e8ed;
+    border: 2px solid var(--ds-ecru);
     border-radius: 8px;
     font-size: 14px;
+    font-family: var(--ds-font-primary);
+    font-weight: 400;
     transition: all 0.3s ease;
-    background: #fff;
+    background: var(--ds-white);
 }
 
 .form-group select:focus,
 .form-group input[type="text"]:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: var(--ds-cobalt);
+    box-shadow: 0 0 0 3px rgba(76, 0, 255, 0.1);
 }
 
 .form-group input[type="text"]::placeholder {
     color: #95a5a6;
 }
 
+.flow-section {
+    background: var(--ds-ecru);
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 16px;
+    min-height: 120px;
+}
+
 .components-section {
-    background: #f8f9fa;
+    background: var(--ds-ecru);
     border: 2px solid #e9ecef;
     border-radius: 8px;
     padding: 16px;
@@ -84,6 +177,78 @@ header h1 {
     font-style: italic;
     text-align: center;
     padding: 20px 0;
+}
+
+.flow-options {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.flow-option {
+    background: var(--ds-white);
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    padding: 16px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.flow-option:hover {
+    border-color: var(--ds-cobalt);
+    box-shadow: 0 2px 8px rgba(76, 0, 255, 0.1);
+}
+
+.flow-option.selected {
+    border-color: var(--ds-cobalt);
+    background: linear-gradient(135deg, rgba(76, 0, 255, 0.05) 0%, rgba(38, 6, 93, 0.05) 100%);
+}
+
+.flow-option input[type="radio"] {
+    margin-right: 12px;
+    width: 18px;
+    height: 18px;
+    accent-color: var(--ds-cobalt);
+}
+
+.flow-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.flow-title {
+    font-family: var(--ds-font-primary);
+    font-weight: 600;
+    color: var(--ds-inkwell);
+    font-size: 14px;
+    letter-spacing: 0.1px;
+}
+
+.flow-description {
+    font-family: var(--ds-font-primary);
+    font-size: 12px;
+    color: #6c757d;
+    margin-bottom: 12px;
+    font-style: italic;
+    font-weight: 400;
+}
+
+.flow-components {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.flow-component {
+    background: var(--ds-cobalt);
+    color: var(--ds-white);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    font-family: var(--ds-font-primary);
+    letter-spacing: 0.1px;
 }
 
 .components-grid {
@@ -104,14 +269,14 @@ header h1 {
 }
 
 .component-item:hover {
-    border-color: #667eea;
+    border-color: var(--ds-cobalt);
     background: #f8f9ff;
 }
 
 .component-item input[type="checkbox"] {
     width: 16px;
     height: 16px;
-    accent-color: #667eea;
+    accent-color: var(--ds-cobalt);
 }
 
 .component-item label {
@@ -136,24 +301,26 @@ header h1 {
     border-radius: 8px;
     font-size: 14px;
     font-weight: 600;
+    font-family: var(--ds-font-primary);
     cursor: pointer;
     transition: all 0.3s ease;
     flex: 1;
+    letter-spacing: 0.2px;
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: linear-gradient(135deg, var(--ds-cobalt) 0%, var(--ds-deep-violet) 100%);
+    color: var(--ds-white);
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 8px 25px rgba(76, 0, 255, 0.3);
 }
 
 .btn-secondary {
     background: #6c757d;
-    color: white;
+    color: var(--ds-white);
 }
 
 .btn-secondary:hover {
@@ -164,18 +331,21 @@ header h1 {
 .results-section {
     margin-top: 20px;
     padding: 20px 24px;
-    background: #f8f9fa;
+    background: var(--ds-ecru);
     border-top: 1px solid #e9ecef;
 }
 
 .results-section h3 {
-    color: #2c3e50;
+    color: var(--ds-inkwell);
     margin-bottom: 12px;
     font-size: 16px;
+    font-family: var(--ds-font-brand);
+    font-weight: 600;
+    letter-spacing: 0.2px;
 }
 
 #configSummary {
-    background: white;
+    background: var(--ds-white);
     padding: 16px;
     border-radius: 8px;
     border: 1px solid #dee2e6;
@@ -184,15 +354,16 @@ header h1 {
 .config-item {
     margin-bottom: 8px;
     font-size: 14px;
+    font-family: var(--ds-font-primary);
 }
 
 .config-item strong {
-    color: #2c3e50;
+    color: var(--ds-inkwell);
     font-weight: 600;
 }
 
 .config-item .value {
-    color: #667eea;
+    color: var(--ds-cobalt);
     font-weight: 500;
 }
 
@@ -207,16 +378,20 @@ header h1 {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
+    background: var(--ds-cobalt);
     border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #a8a8a8;
+    background: var(--ds-deep-violet);
 }
 
 /* Animation for components appearing */
 .components-grid {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.flow-options {
     animation: fadeIn 0.3s ease-in-out;
 }
 
