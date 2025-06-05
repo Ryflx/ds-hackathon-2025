@@ -45,16 +45,14 @@
 /* Minimize/Expand Tab */
 .demo-banner-minimize-tab {
     position: absolute !important;
-    top: -32px !important;
+    top: -20px !important;
     right: 24px !important;
-    background: #F97316 !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    border-bottom: none !important;
+    background: #FC5153 !important;
+    border: none !important;
     border-radius: 8px 8px 0 0 !important;
-    padding: 6px 10px !important;
+    padding: 3px 10px !important;
     cursor: pointer !important;
     transition: all 0.2s ease !important;
-    box-shadow: 0 -2px 8px rgba(19, 0, 50, 0.2) !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -63,8 +61,7 @@
 
 .demo-banner-minimize-tab:hover {
     transform: translateY(-2px) !important;
-    box-shadow: 0 -4px 12px rgba(19, 0, 50, 0.3) !important;
-    background: #EA580C !important;
+    background: #E8454A !important;
 }
 
 .demo-banner-minimize-icon {
@@ -104,34 +101,40 @@
     width: 100% !important;
     gap: 20px !important;
     transition: opacity 0.3s ease !important;
-    padding: 0 24px 0 24px !important;
+    padding: 0 24px 0 0 !important;
 }
 
 .demo-banner-left {
     display: flex !important;
-    align-items: center !important;
-    gap: 12px !important;
+    align-items: flex-end !important;
+    gap: 20px !important;
     flex-shrink: 0 !important;
+    position: relative !important;
+    margin-left: -4px !important;
 }
 
 .demo-banner-persona-image {
-    width: 48px !important;
-    height: 48px !important;
-    border-radius: 50% !important;
-    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+    width: 80px !important;
+    height: 80px !important;
+    border-radius: 12px !important;
+    border: none !important;
     object-fit: cover !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+    box-shadow: none !important;
     flex-shrink: 0 !important;
+    position: relative !important;
+    top: -4px !important;
+    margin-left: 0 !important;
 }
 
 .demo-banner-persona-info {
     display: flex !important;
     flex-direction: column !important;
     gap: 4px !important;
+    padding-bottom: 8px !important;
 }
 
 .demo-banner-persona-title {
-    font-size: 16px !important;
+    font-size: 18px !important;
     font-weight: 600 !important;
     color: #FFFFFF !important;
     margin: 0 !important;
@@ -139,11 +142,11 @@
 }
 
 .demo-banner-persona-role {
-    font-size: 12px !important;
-    color: #CBC2FF !important;
+    font-size: 14px !important;
+    color: #FFE4B5 !important;
     margin: 0 !important;
     opacity: 0.9 !important;
-    font-weight: 400 !important;
+    font-weight: 500 !important;
 }
 
 .demo-banner-center {
@@ -332,29 +335,36 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
 }
 
+/* Active/Highlighted step state */
+.demo-step-item.active {
+    background: rgba(255, 255, 255, 0.4) !important;
+    border: 2px solid #FFE4B5 !important;
+    font-weight: 700 !important;
+    transform: scale(1.05) !important;
+    box-shadow: 0 0 12px rgba(255, 228, 181, 0.3) !important;
+}
+
+.demo-step-item.active:hover {
+    background: rgba(255, 255, 255, 0.5) !important;
+    transform: scale(1.05) translateY(-1px) !important;
+}
+
 /* Value Statement Back Side */
 .demo-banner-value-title {
-    font-size: 12px !important;
-    color: rgba(255, 255, 255, 0.8) !important;
-    margin-bottom: 12px !important;
-    font-weight: 500 !important;
+    display: none !important;
 }
 
 .demo-banner-value-content {
     display: flex !important;
     flex-direction: column !important;
     align-items: center !important;
-    gap: 12px !important;
+    justify-content: center !important;
     width: 100% !important;
-    padding: 8px 0 !important;
+    padding: 12px 0 !important;
 }
 
 .value-step-name {
-    font-size: 14px !important;
-    font-weight: 600 !important;
-    color: #FFE4B5 !important;
-    margin-bottom: 8px !important;
-    white-space: nowrap !important;
+    display: none !important;
 }
 
 .value-statement-row {
@@ -366,12 +376,18 @@
 }
 
 .value-statement {
-    font-size: 13px !important;
+    font-size: 16px !important;
+    font-weight: bold !important;
     color: rgba(255, 255, 255, 0.95) !important;
     line-height: 1.4 !important;
     text-align: left !important;
     flex: 1 !important;
     padding: 0 8px !important;
+}
+
+.value-statement .stat-number {
+    font-style: italic !important;
+    font-weight: bold !important;
 }
 
 .demo-banner-back-btn {

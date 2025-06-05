@@ -6,6 +6,10 @@
     
     let demoBanner = null;
     let isInitialized = false;
+    let currentConfig = null;
+    let currentStepIndex = 0;
+    let stepItems = [];
+    let tabId = null;
     
     // Persona data mapping
     const personaData = {
@@ -27,16 +31,25 @@
         if (isInitialized) return;
         isInitialized = true;
         
-        console.log('Demo Sidekick: Content script initialized');
+        // Generate unique tab identifier
+        const currentTabId = generateTabId();
+        console.log('Demo Sidekick: Content script initialized for tab:', currentTabId);
         
         // Listen for messages from popup
         chrome.runtime.onMessage.addListener(handleMessage);
         
-        // Check if there's an existing demo configuration
-        chrome.storage.local.get(['activeDemoConfig'], function(result) {
-            if (result.activeDemoConfig) {
-                console.log('Demo Sidekick: Found existing demo config, showing banner');
-                showDemoBanner(result.activeDemoConfig);
+        // Add hotkey listener for step progression
+        document.addEventListener('keydown', handleHotkey);
+        
+        // Check for existing config for this specific tab
+        const tabConfigKey = `demoConfig_${currentTabId}`;
+        chrome.storage.local.get([tabConfigKey], function(result) {
+            if (result[tabConfigKey]) {
+                console.log('Demo Sidekick: Found existing demo config for this tab, showing banner');
+                showDemoBanner(result[tabConfigKey]);
+            } else {
+                // Check for inherited configuration from parent tabs
+                checkForInheritedConfig();
             }
         });
     }
@@ -60,6 +73,12 @@
                 const visible = !!demoBanner;
                 console.log('Demo Sidekick: Banner status check:', visible);
                 sendResponse({ visible: visible });
+                break;
+            case 'getTabConfig':
+                // Return current tab's configuration
+                const tabConfig = sessionStorage.getItem('demoSidekickConfig');
+                const config = tabConfig ? JSON.parse(tabConfig) : currentConfig;
+                sendResponse({ config: config });
                 break;
         }
         
@@ -85,8 +104,22 @@
             const currentPadding = parseInt(getComputedStyle(document.body).paddingBottom) || 0;
             document.body.style.paddingBottom = (currentPadding + 80) + 'px';
             
-            // Store active config
-            chrome.storage.local.set({ 'activeDemoConfig': config });
+            // Store active config for this specific tab
+            const currentTabId = generateTabId();
+            const tabConfigKey = `demoConfig_${currentTabId}`;
+            
+            // Add metadata for inheritance
+            const configWithMetadata = {
+                ...config,
+                tabId: currentTabId,
+                timestamp: Date.now(),
+                inheritToNewTabs: true
+            };
+            
+            chrome.storage.local.set({ [tabConfigKey]: configWithMetadata });
+            
+            // Also store in sessionStorage for immediate access
+            sessionStorage.setItem('demoSidekickConfig', JSON.stringify(configWithMetadata));
             
             // Animate in
             setTimeout(() => {
@@ -118,8 +151,18 @@
             }, 300);
         }
         
-        // Clear stored config
-        chrome.storage.local.remove(['activeDemoConfig']);
+        // Reset step progression
+        stepItems = [];
+        currentStepIndex = 0;
+        currentConfig = null;
+        
+        // Clear stored config for this specific tab
+        const currentTabId = generateTabId();
+        const tabConfigKey = `demoConfig_${currentTabId}`;
+        chrome.storage.local.remove([tabConfigKey]);
+        
+        // Clear sessionStorage
+        sessionStorage.removeItem('demoSidekickConfig');
     }
     
     // Create the banner HTML element
@@ -184,6 +227,9 @@
         // Add step click handlers
         addStepClickHandlers(banner, config.flowDetails);
         
+        // Initialize step progression
+        initializeStepProgression(banner, config);
+        
         return banner;
     }
     
@@ -217,7 +263,6 @@
         const flipContainer = banner.querySelector('.demo-banner-flip-inner');
         
         valueText.innerHTML = `
-            <div class="value-step-name">${stepName}</div>
             <div class="value-statement-row">
                 <div class="value-statement">${valueStatement}</div>
                 <button class="demo-banner-back-btn">← Back to Steps</button>
@@ -282,6 +327,56 @@
         return (personaName.length % 4) + 1;
     }
     
+    // Handle hotkey for step progression
+    function handleHotkey(event) {
+        // Only handle spacebar and only when banner is visible
+        if (event.code === 'Space' && demoBanner && !demoBanner.classList.contains('hidden') && !demoBanner.classList.contains('collapsed')) {
+            // Prevent default behavior (scrolling)
+            event.preventDefault();
+            
+            // Don't trigger if user is typing in an input field
+            if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA' || event.target.isContentEditable) {
+                return;
+            }
+            
+            advanceToNextStep();
+        }
+    }
+
+    // Initialize step progression
+    function initializeStepProgression(banner, config) {
+        stepItems = Array.from(banner.querySelectorAll('.demo-step-item'));
+        currentConfig = config;
+        currentStepIndex = 0;
+        
+        // Highlight the first step
+        if (stepItems.length > 0) {
+            highlightStep(0);
+        }
+    }
+
+    // Advance to the next step
+    function advanceToNextStep() {
+        if (!stepItems || stepItems.length === 0) return;
+        
+        // Move to next step, wrap around to beginning if at end
+        currentStepIndex = (currentStepIndex + 1) % stepItems.length;
+        highlightStep(currentStepIndex);
+        
+        console.log(`Demo Sidekick: Advanced to step ${currentStepIndex + 1}: ${stepItems[currentStepIndex].textContent}`);
+    }
+
+    // Highlight a specific step
+    function highlightStep(index) {
+        if (!stepItems || index < 0 || index >= stepItems.length) return;
+        
+        // Remove active class from all steps
+        stepItems.forEach(step => step.classList.remove('active'));
+        
+        // Add active class to current step
+        stepItems[index].classList.add('active');
+    }
+    
     // Auto-hide banner on navigation (optional)
     function handleNavigation() {
         if (demoBanner) {
@@ -300,5 +395,39 @@
     
     // Handle page navigation
     window.addEventListener('beforeunload', handleNavigation);
+    
+    // Generate unique tab identifier
+    function generateTabId() {
+        if (!tabId) {
+            // Try to get from sessionStorage first
+            tabId = sessionStorage.getItem('demoSidekickTabId');
+            if (!tabId) {
+                // Generate new unique ID
+                tabId = 'tab_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+                sessionStorage.setItem('demoSidekickTabId', tabId);
+            }
+        }
+        return tabId;
+    }
+
+    // Check for inherited configuration
+    function checkForInheritedConfig() {
+        // Check if this page was opened from another tab with a demo active
+        if (document.referrer) {
+            // Look for any active demo configs that might be inherited
+            chrome.storage.local.get(null, function(items) {
+                const activeConfigs = Object.keys(items).filter(key => key.startsWith('demoConfig_'));
+                if (activeConfigs.length > 0) {
+                    // Use the most recent config as inherited (could be enhanced with better logic)
+                    const latestConfigKey = activeConfigs[activeConfigs.length - 1];
+                    const config = items[latestConfigKey];
+                    if (config && config.inheritToNewTabs !== false) {
+                        console.log('Demo Sidekick: Inheriting config from parent tab:', config);
+                        showDemoBanner(config);
+                    }
+                }
+            });
+        }
+    }
     
 })(); 

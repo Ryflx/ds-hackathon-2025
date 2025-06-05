@@ -85,6 +85,9 @@ header {
     display: flex;
     align-items: center;
     gap: 12px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--ds-border);
 }
 
 .logo {
@@ -576,4 +579,42 @@ header {
     outline: none;
     border-color: var(--ds-cobalt);
     box-shadow: 0 0 0 2px rgba(76, 0, 255, 0.1);
+}
+
+/* Tab Status Indicator */
+.tab-status {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    margin: 16px 0;
+    border-radius: 8px;
+    border: 1px solid #e0e7ff;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    font-size: 12px;
+}
+
+.tab-status.active {
+    border-color: #10b981;
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+}
+
+.status-indicator {
+    font-size: 16px;
+    line-height: 1;
+}
+
+.status-text {
+    flex: 1;
+    line-height: 1.4;
+}
+
+.status-text strong {
+    color: #065f46;
+    font-weight: 600;
+}
+
+.status-text small {
+    color: #059669;
+    opacity: 0.8;
 } 

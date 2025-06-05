@@ -5,10 +5,79 @@ document.addEventListener('DOMContentLoaded', function() {
     const flowSection = document.getElementById('flowSection');
     const resetBtn = document.getElementById('resetBtn');
     const submitBtn = document.getElementById('submitBtn');
-    const testBtn = document.getElementById('testBtn');
     const demoForm = document.getElementById('demoForm');
     const resultsSection = document.getElementById('resultsSection');
     const configSummary = document.getElementById('configSummary');
+    
+    // Current tab info
+    let currentTabId = null;
+
+    // Function to get current tab's demo configuration
+    function getCurrentTabConfig(callback) {
+        chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+            if (tabs[0]) {
+                currentTabId = tabs[0].id;
+                // Try to get the config from the content script first
+                chrome.tabs.sendMessage(currentTabId, { action: 'getTabConfig' }, function(response) {
+                    if (chrome.runtime.lastError) {
+                        // Content script not available, check storage directly
+                        chrome.storage.local.get(null, function(items) {
+                            const tabConfigs = Object.keys(items)
+                                .filter(key => key.startsWith('demoConfig_'))
+                                .map(key => items[key])
+                                .filter(config => config);
+                            
+                            callback(tabConfigs.length > 0 ? tabConfigs[0] : null);
+                        });
+                    } else {
+                        callback(response ? response.config : null);
+                    }
+                });
+            } else {
+                callback(null);
+            }
+        });
+    }
+
+    // Function to display current tab status
+    function displayTabStatus() {
+        getCurrentTabConfig(function(config) {
+            if (config) {
+                // Show that there's an active demo in this tab
+                const statusDiv = document.createElement('div');
+                statusDiv.className = 'tab-status active';
+                statusDiv.innerHTML = `
+                    <div class="status-indicator">🎭</div>
+                    <div class="status-text">
+                        <strong>Active Demo:</strong> ${config.personaName}<br>
+                        <small>${config.flowDetails?.title || config.demoType}</small>
+                    </div>
+                `;
+                
+                // Insert after header
+                const header = document.querySelector('header');
+                const existingStatus = document.querySelector('.tab-status');
+                if (existingStatus) {
+                    existingStatus.remove();
+                }
+                header.insertAdjacentElement('afterend', statusDiv);
+                
+                // Update button text
+                submitBtn.textContent = 'Update Demo';
+                submitBtn.style.background = 'linear-gradient(135deg, #FF5252 0%, #D32F2F 100%)';
+            } else {
+                // Remove status if no active demo
+                const existingStatus = document.querySelector('.tab-status');
+                if (existingStatus) {
+                    existingStatus.remove();
+                }
+                
+                // Reset button
+                submitBtn.textContent = 'Configure Demo';
+                submitBtn.style.background = 'linear-gradient(135deg, var(--ds-cobalt) 0%, var(--ds-deep-violet) 100%)';
+            }
+        });
+    }
 
     // Flow definitions for different demo types
     const flowOptions = {
@@ -16,20 +85,20 @@ document.addEventListener('DOMContentLoaded', function() {
             'flow1': {
                 title: 'Flow 1: Full IAM',
                 description: 'Complete IAM workflow with all key components',
-                components: ['Web Form', 'Document Generation', 'ID Verification', 'Navigator', 'Maestro'],
+                components: ['Web Form', 'Document Generation', 'eSignature', 'Navigator', 'Maestro'],
                 steps: [
                     'Start with Web Form configuration',
                     'Generate documents automatically', 
-                    'Verify identity through IDV process',
+                    'Complete electronic signature process',
                     'Navigate through agreement workflow',
                     'Automate with Maestro capabilities'
                 ],
                 valueStatements: {
-                    'Web Form': 'Streamline data collection with intelligent forms that reduce errors by 85% and speed up document creation',
-                    'Document Generation': 'Auto-generate accurate documents in seconds, eliminating manual drafting and reducing turnaround time by 70%',
-                    'ID Verification': 'Ensure signer authenticity with bank-grade identity verification, reducing fraud risk by 99%',
-                    'Navigator': 'Guide signers through complex agreements with smart navigation, improving completion rates by 40%',
-                    'Maestro': 'Orchestrate entire workflows automatically, reducing manual coordination effort by 90%'
+                    'Web Form': '<span class="stat-number">76%</span> people abandon forms due to disjointed experience',
+                    'Document Generation': '<span class="stat-number">49%</span> reduction in errors in documents',
+                    'eSignature': 'Ensure signer authenticity with bank-grade identity verification, reducing fraud risk by <span class="stat-number">99%</span>',
+                    'Navigator': 'Without navigator it takes <span class="stat-number">45</span> mins to locate specific agreements & <span class="stat-number">1hr 24mins</span> for a specific clause in an agreement',
+                    'Maestro': '<span class="stat-number">70%</span> reduction in time using Maestro & App Centre'
                 }
             },
             'flow2': {
@@ -41,8 +110,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     'Manage ongoing obligations and deadlines'
                 ],
                 valueStatements: {
-                    'Navigator': 'Centralized hub for all agreement activities, providing 360° visibility and reducing search time by 80%',
-                    'Obligations': 'Never miss critical deadlines with automated obligation tracking, reducing compliance risk by 95%'
+                    'Navigator': 'Without navigator it takes <span class="stat-number">45</span> mins to locate specific agreements & <span class="stat-number">1hr 24mins</span> for a specific clause in an agreement',
+                    'Obligations': '<span class="stat-number">95%</span> reduction in compliance risk with automated obligation tracking'
                 }
             }
         },
@@ -465,50 +534,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Test button for debugging
-    testBtn.addEventListener('click', function() {
-        console.log('Demo Sidekick: Test button clicked');
-        
-        // Get current form values or use defaults
-        const currentPersonaName = personaNameInput.value.trim() || 'Test User';
-        const currentDemoType = demoTypeSelect.value || 'IAM';
-        
-        const testConfig = {
-            demoType: currentDemoType,
-            personaName: currentPersonaName,
-            selectedFlow: 'flow1',
-            flowDetails: { 
-                title: `Test ${currentDemoType} Flow`, 
-                components: currentDemoType === 'IAM' ? ['Web Form', 'Maestro'] : ['Doc Gen', 'Review']
-            }
-        };
-        
-        chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
-            if (tabs[0]) {
-                ensureContentScript(tabs[0].id, function(success) {
-                    if (success) {
-                        // Wait a moment for the script to initialize
-                        setTimeout(() => {
-                            chrome.tabs.sendMessage(tabs[0].id, {
-                                action: 'showDemoBanner',
-                                config: testConfig
-                            }, function(response) {
-                                console.log('Demo Sidekick: Test response:', response);
-                                if (chrome.runtime.lastError) {
-                                    console.error('Demo Sidekick: Test error:', chrome.runtime.lastError.message);
-                                } else if (response && response.success) {
-                                    console.log('Demo Sidekick: Test banner shown successfully!');
-                                }
-                            });
-                        }, 500);
-                    } else {
-                        console.error('Demo Sidekick: Failed to inject content script for test');
-                    }
-                });
-            }
-        });
-    });
-
     // Function to display results
     function displayResults(data) {
         const flowInfo = data.flowDetails ? 
@@ -543,23 +568,52 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Reset button handler
     resetBtn.addEventListener('click', function() {
+        // First hide the demo banner if it's active
+        chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+            if (tabs[0]) {
+                chrome.tabs.sendMessage(tabs[0].id, {
+                    action: 'hideDemoBanner'
+                }, function(response) {
+                    if (chrome.runtime.lastError) {
+                        // Content script might not be loaded, that's okay
+                        console.log('Demo Sidekick: Content script not found or banner not active');
+                    } else if (response && response.success) {
+                        console.log('Demo banner hidden successfully');
+                    }
+                    
+                    // Refresh tab status after hiding banner
+                    displayTabStatus();
+                });
+            }
+        });
+        
+        // Reset the form
         demoForm.reset();
         flowSection.innerHTML = '<p class="placeholder-text">Please select a demo type first</p>';
         resultsSection.style.display = 'none';
         
-        // Clear stored configuration
-        if (chrome && chrome.storage) {
-            chrome.storage.local.remove('demoConfig');
+        // Reset button state
+        submitBtn.textContent = 'Configure Demo';
+        submitBtn.style.background = 'linear-gradient(135deg, var(--ds-cobalt) 0%, var(--ds-deep-violet) 100%)';
+        
+        // Remove end demo button if it exists
+        const endDemoBtn = document.getElementById('endDemoBtn');
+        if (endDemoBtn) {
+            endDemoBtn.remove();
         }
+        
+        // Clear stored configuration (this is now handled by hideDemoBanner in content script)
     });
 
     // Load saved configuration on startup
     if (chrome && chrome.storage) {
-        chrome.storage.local.get(['demoConfig'], function(result) {
-            if (result.demoConfig) {
-                const config = result.demoConfig;
-                
-                // Restore form values
+        // Display current tab status first
+        displayTabStatus();
+        
+        // Load current tab's configuration if available
+        getCurrentTabConfig(function(config) {
+            if (config) {
+                // Restore form values from current tab's config
                 demoTypeSelect.value = config.demoType;
                 personaNameInput.value = config.personaName;
                 
